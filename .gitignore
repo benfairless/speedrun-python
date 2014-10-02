@@ -21,3 +21,5 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Application-specific ignores
+*.pyc
+logs/

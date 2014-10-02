@@ -1,0 +1,6 @@
+# Python requirements file for PIP
+
+Flask
+gunicorn
+eventlet
+requests

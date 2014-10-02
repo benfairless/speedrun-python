@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# APP-MANAGE CONFIGURATION VARIABLES
+APP_DIR="/vagrant"
+LOG_DIR="${APP_DIR}/logs"
+WORKON_HOME=${WORKON_HOME:-"/tmp/venv"}
+APP="app"
+
+# Set task based on $1
+while getopts ":e:p:" opt; do
+  case $opt in
+     e) ENVFILE=$OPTARG  ;;
+     p) PROCFILE=$OPTARG ;;
+    \?) echo "Illegal argument. Available arguments are -e (for environment file path) and -p (for Procfile path)" >&2 ; exit 1 ;;
+     :) echo "Option -$OPTARG requires an argument" >&2; exit 1 ;;
+  esac
+  shift
+done
+
+echo $PROCFILE
+echo $ENVFILE
+while [ $# -gt 0 ]; do
+  case $1 in
+         server) ROLE=SERVER ;;
+    development) ROLE=DEVELOPMENT ;;
+  esac
+  shift
+done
+
+# Load virtualenvwrapper
+source /usr/local/bin/virtualenvwrapper.sh
+
+# Create directories if they don't exist
+[ ! -d ${WORKON_HOME} ] && mkdir -p ${WORKON_HOME}
+[ ! -d ${LOG_DIR} ] && mkdir -p ${LOG_DIR}
+
+
+shout() {
+  # Shout input as bold text
+  echo "`tput bold`[APP-MAN] $@`tput sgr0`"
+}
+
+create_env() {
+  # Creates Python virtual environment for application
+  if [[ ! -d ${WORKON_HOME}/${APP} ]] ; then
+    shout "Creating Python Virtual Environment in ${WORKON_HOME}"
+    mkvirtualenv -a "$APP_DIR" -r $APP_DIR/requirements.txt ${APP} > ${LOG_DIR}/pip.log
+  fi
+}
+
+activate_env() {
+  # Switches into Python virtual environment for application
+  shout "Activating virtual environment"
+  workon ${APP}
+}
+
+foreman_app() {
+  local PROCFILE=${PROCFILE:-${APP_DIR}/Procfile}
+  local ENVFILE=${ENVFILE:-${APP_DIR}/development.env}
+
+  if [ -f $ENVFILE ]; then
+    FOREMAN_ARGS="-e ${ENVFILE}"
+    echo "Environment variables loaded from ${ENVFILE}"
+  else
+    echo "ERROR: No environment file found at ${ENVFILE}" >&2
+    exit 1
+  fi
+  if [ -f $PROCFILE ]; then
+    foreman start -f ${PROCFILE} -d ${APP_DIR} ${FOREMAN_ARGS}
+  else
+    echo "ERROR: No Procfile found at ${PROCFILE}" >&2
+    exit 1
+  fi
+}
+
+
+run_dev() {
+  # Run application with stand-alone Python console
+  local PROCFILE=${PROCFILE:-${APP_DIR}/local/Procfile.dev}
+  foreman_app > >(tee -a ${LOG_DIR}/development_$(date +%Y-%m-%d).log) 2>&1
+}
+run_srv() {
+  # Run application with default Procfile (as seen in Production)
+  foreman_app > >(tee -a ${LOG_DIR}/production_$(date +%Y-%m-%d).log) 2>&1
+}
+
+###########
+# RUNTIME #
+###########
+create_env
+activate_env
+case $ROLE in
+  SERVER)      shout "SERVER MODE"
+               run_srv    ;;
+
+  *)           shout "DEVELOPMENT MODE"
+               run_dev ;;
+esac

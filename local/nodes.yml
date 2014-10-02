@@ -1,0 +1,27 @@
+# Node configuration for Vagrant
+---
+
+  nodes:
+
+# Example node
+#   ubuntu.local:
+#     ip: 192.168.1.1
+#     port-forwarding:
+#       - host: 8080
+#         guest: 80
+#     specifications:
+#       memory: 2048
+#       cpus: 2
+#     folders:
+#       - source: /tmp/example
+#         destination: /example
+
+    app:
+      ip: 192.168.99.10
+      port-forwarding:
+        - host: 8080
+          guest: 5000
+      specifications:
+        memory:  1024
+        cpus: 1
+      folders: {}
