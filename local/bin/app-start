@@ -17,8 +17,6 @@ while getopts ":e:p:" opt; do
   shift
 done
 
-echo $PROCFILE
-echo $ENVFILE
 while [ $# -gt 0 ]; do
   case $1 in
          server) ROLE=SERVER ;;
