@@ -76,8 +76,6 @@ You can launch your application in this mode by running:
 $ app-start server
 ```
 
-There are many other reasons why running in this mode is useful. In the example project we run some basic tests using
-
 ### Arguments
 ```
 app-server [ OPTIONS ] ROLE
