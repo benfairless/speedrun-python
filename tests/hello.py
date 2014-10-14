@@ -4,7 +4,7 @@ import time
 import sys
 
 baseurl = str("http://" + "localhost" + ":" + "5000" + "/" )
-delay = 3 # time in seconds between each loop
+delay = 30 # time in seconds between each loop
 max_fails = 5 # maximum amount of failures before aborting
 
 current_fails = 0
