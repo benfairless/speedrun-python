@@ -36,12 +36,10 @@ Vagrant.configure("2") do |config|
       # Establish network addresses
       if conf['ip'] != ''
         node.vm.network :private_network,
-        ip: conf['ip'],
-        virtualbox_intnet: true
+        ip: conf['ip']
       else
         node.vm.network :private_network,
-        type: dhcp,
-        virtualbox_intnet: true
+        type: dhcp
       end
 
       # Set up port forwarding
